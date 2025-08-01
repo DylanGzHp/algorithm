@@ -1,6 +1,7 @@
 package lc373;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -46,34 +47,60 @@ public class Solution {
 
     public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
 
-        // 存储三元组 (num1[i], nums2[i], i)
-        // i 记录 nums2 元素的索引位置，用于生成下一个节点
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> {
-            // 按照数对的元素和升序排序
-            return (a[0] + a[1]) - (b[0] + b[1]);
-        });
-        // 按照 23 题的逻辑初始化优先级队列
-        for (int i = 0; i < nums1.length; i++) {
-            pq.offer(new int[]{nums1[i], nums2[0], 0});
+        // 构造三元组  [ 数组1中的元素，数组2中的元素，数组2的索引下标 ] ， 该三元组用来笛卡尔积遍历两个数组内的所有元素。
+        PriorityQueue<int[]> queue = new PriorityQueue<>(nums1.length, (a,b)-> a[0] + a[1] - b[0] - b [1]);
+
+        // 初始化入队，nums1中的每个元素和 nums2 中的第一个元素入队，初始化完成后，则按照每个nums1 元素固定，依次遍历每个 nums2 元素的顺序遍历
+        for (int i = 0; i < nums1.length; i++){
+            int[] ints = new int[3];
+            ints[0] = nums1[i];
+            ints[1] = nums2[0];
+            ints[2] = 0;
+            queue.offer(ints);
         }
 
-        List<List<Integer>> res = new ArrayList<>();
-        // 执行合并多个有序链表的逻辑
-        while (!pq.isEmpty() && k > 0) {
-            int[] cur = pq.poll();
+        List res = new ArrayList<List<Integer>>();
+
+        while (k > 0){
+            int[] poll = queue.poll();
             k--;
-            // 链表中的下一个节点加入优先级队列
-            int next_index = cur[2] + 1;
-            if (next_index < nums2.length) {
-                pq.add(new int[]{cur[0], nums2[next_index], next_index});
+
+            if (poll[2] + 1 < nums2.length){
+                int[] ints = new int[3];
+                ints[0] = poll[0];
+                ints[1] = nums2[poll[2]+1];
+                ints[2] = poll[2] + 1;
+                queue.add(ints);
             }
 
-            List<Integer> pair = new ArrayList<>();
-            pair.add(cur[0]);
-            pair.add(cur[1]);
-            res.add(pair);
+
+            ArrayList<Integer> tmp = new ArrayList<>();
+            tmp.add(poll[0]);
+            tmp.add(poll[1]);
+            res.add(tmp);
+
         }
+
+
         return res;
 
+
+
+    }
+
+    public static void main(String[] args) {
+        // 输入示例
+        int[] nums1 = {1, 7, 11};
+        int[] nums2 = {2, 4, 6};
+        int k = 3;
+
+        Solution solution = new Solution();
+        // 调用 kSmallestPairs 方法
+        List<List<Integer>> result = solution.kSmallestPairs(nums1, nums2, k);
+
+        // 打印结果
+        for (List<Integer> pair : result) {
+            System.out.println(pair);
+        }
     }
 }
